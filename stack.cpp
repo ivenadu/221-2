@@ -12,11 +12,20 @@
  *
  */
 
+
+int * top;
+int size = DEFAULTCAPACITY;
+
+
 template <class T> Stack<T>::Stack()
 {
   /**
    * @todo Your code here!
    */
+
+items = new int[DEFAULTCAPACITY];
+top = -1;
+
 }
 
 /**
@@ -42,6 +51,9 @@ template <class T> void Stack<T>::push(const T &newItem)
   /**
    * @todo Your code here!
    */
+  if (top == size ) resize();
+
+
 };
 
 /**
