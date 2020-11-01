@@ -13,18 +13,15 @@
  */
 
 
-int * top;
-int size = DEFAULTCAPACITY;
+int top_;
 
 
 template <class T> Stack<T>::Stack()
 {
-  /**
-   * @todo Your code here!
-   */
-
 items = new int[DEFAULTCAPACITY];
-top = -1;
+max_items = DEFAULTCAPACITY;
+top_ = 0;
+num_items = 0;
 
 }
 
@@ -34,9 +31,9 @@ top = -1;
  */
 template <class T> Stack<T>::~Stack()
 {
-  /**
-   * @todo Your code here!
-   */
+  top_ = 0;
+  delete items;
+  items = NULL;
 }
 
 /**
@@ -48,12 +45,10 @@ template <class T> Stack<T>::~Stack()
  */
 template <class T> void Stack<T>::push(const T &newItem)
 {
-  /**
-   * @todo Your code here!
-   */
-  if (top == size ) resize();
-
-
+  if (num_items == max_items) resize(max_items * EXPANSIONFACTOR);
+  items[top_] = newItem;
+  num_items++;
+  top_++;
 };
 
 /**
@@ -69,10 +64,9 @@ template <class T> void Stack<T>::push(const T &newItem)
  */
 template <class T> T Stack<T>::pop()
 {
-  /**
-   * @todo Your code here! You will need to replace the following line.
-   */
-  return T();
+  top_--;
+  if (num_items <= (max_items/SHRINKWHEN)) resize(max_items/EXPANSIONFACTOR);
+  return items[top_];
 };
 
 /**
@@ -85,10 +79,7 @@ template <class T> T Stack<T>::pop()
  */
 template <class T> T Stack<T>::peek()
 {
-  /**
-   * @todo Your code here! You will need to replace the following line.
-   */
-  return T();
+  return items[top_];
 };
 
 /**
@@ -98,10 +89,7 @@ template <class T> T Stack<T>::peek()
  */
 template <class T> bool Stack<T>::empty() const
 {
-  /**
-   * @todo Your code here! You will need to replace the following line.
-   */
-  return true;
+  return num_items==0;
 };
 
 /**
@@ -114,10 +102,7 @@ template <class T> bool Stack<T>::empty() const
  */
 template <class T> size_t Stack<T>::capacity() const
 {
-  /**
-   * @todo Your code here! You will need to replace the following line.
-   */
-  return 0;
+  return max_items;
 };
 
 /**
@@ -127,10 +112,7 @@ template <class T> size_t Stack<T>::capacity() const
  */
 template <class T> size_t Stack<T>::size() const
 {
-  /**
-   * @todo Your code here! You will need to replace the following line.
-   */
-  return 0;
+  return num_items;
 };
 
 /**
@@ -141,8 +123,19 @@ template <class T> size_t Stack<T>::size() const
  */
 template <class T> void Stack<T>::resize(size_t n)
 {
-  /**
-   * @todo Your code here!
-   */
+  T *temp = items;
+  T *resized = new int[n];
+  int number;
+  number = num_items;
+  num_items = 0;
+  max_items = n;
+  top_ = 0;
+  items = resized;
+  for (int i = 0; i < number; i++) {
+    push(temp[i]);
+  }
+  delete temp;
+  temp = NULL;
+  
 
 };
