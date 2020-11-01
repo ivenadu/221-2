@@ -65,8 +65,10 @@ template <class T> void Stack<T>::push(const T &newItem)
 template <class T> T Stack<T>::pop()
 {
   top_--;
+  num_items--; 
   if (num_items <= (max_items/SHRINKWHEN)) resize(max_items/EXPANSIONFACTOR);
   return items[top_];
+  
 };
 
 /**
@@ -79,7 +81,7 @@ template <class T> T Stack<T>::pop()
  */
 template <class T> T Stack<T>::peek()
 {
-  return items[top_];
+  return items[top_-1];
 };
 
 /**
