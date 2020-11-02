@@ -12,10 +12,13 @@ int main()
 {
 
   PNG im1;
+  printf("geo.png...\n");
   im1.readFromFile("images/geo.png");
   pair<int,int> start1(2,2);
   rainbowRipple(im1,start1,"0r0o0y0g0b0i0v");
   im1.writeToFile("images/georr.png");
+
+  printf("stanley-totem-poles.png...\n");
 
   PNG im2;
   im2.readFromFile("images/stanley-totem-poles.png");
@@ -23,6 +26,7 @@ int main()
   rainbowRipple(im2,start2,"1r2o3y4g3b2i1v");
   im2.writeToFile("images/stanley-totem-polesrr.png");
 
+  printf("blank.png...\n");
   PNG im3;
   im3.readFromFile("images/blank.png");
   pair<int,int> start3(320,200);
