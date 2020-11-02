@@ -14,16 +14,10 @@
  */
 template <class T> void Queue<T>::enq(T const &newItem)
 {
-  while (!stack_1.empty()) {
-    stack_2.push(stack_1.pop());
-    }
-  stack_1.push(newItem);
   while (!stack_2.empty()) {
     stack_1.push(stack_2.pop());
   }
-    
-    
-  
+  stack_1.push(newItem);
 }
 
 /**
@@ -34,7 +28,12 @@ template <class T> void Queue<T>::enq(T const &newItem)
  */
 template <class T> T Queue<T>::deq()
 {
-  return stack_1.pop();
+  if (stack_1.size() == 1) return stack_1.pop();
+
+  while (!stack_1.empty()) {
+    stack_2.push(stack_1.pop());
+  }
+  return stack_2.pop();
 }
 
 /**
@@ -48,7 +47,10 @@ template <class T> T Queue<T>::peek()
   /**
    * @todo Your code here! You will need to replace the following line.
    */
-  return T();
+  while (!stack_1.empty()) {
+    stack_2.push(stack_1.pop());
+  }
+  return stack_2.peek();
 }
 
 /**
@@ -58,8 +60,5 @@ template <class T> T Queue<T>::peek()
  */
 template <class T> bool Queue<T>::empty() const
 {
-  /**
-   * @todo Your code here! You will need to replace the following line.
-   */
-  return true;
+  return (stack_1.empty() && stack_2.empty());
 }
