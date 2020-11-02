@@ -133,35 +133,32 @@ bool good(PNG &image, vector<vector<int>> &D,
                      *image.getPixel(next.first, next.second));
 }
 
-vector<pair<int, int>> neighbors(PNG &image, vector<vector<int>> &D, pair<int, int> curr)
+vector<pair<int, int>> neighbors(pair<int, int> curr)
 {
 
   vector<pair<int, int>> n;
 
   {
     auto x = make_pair(curr.first, curr.second + 1);
-    if (good(image, D, curr, x))
-      n.push_back(x);
+    n.push_back(x);
   }
   {
     auto x = make_pair(curr.first, curr.second - 1);
-    if (good(image, D, curr, x))
-      n.push_back(x);
+    n.push_back(x);
   }
   {
     auto x = make_pair(curr.first + 1, curr.second);
-    if (good(image, D, curr, x))
-      n.push_back(x);
+    n.push_back(x);
   }
   {
     auto x = make_pair(curr.first - 1, curr.second);
-    if (good(image, D, curr, x))
-      n.push_back(x);
+    n.push_back(x);
   }
 
   return n;
 }
 
+/*
 void traverse(pair<int, int> parent, pair<int, int> curr, PNG &image, Queue<pair<int, int>> &bfs, vector<vector<int>> &D, int level)
 {
   if (good(image, D, parent, curr))
@@ -170,7 +167,7 @@ void traverse(pair<int, int> parent, pair<int, int> curr, PNG &image, Queue<pair
     DISTANCE(curr) = level;
   }
 
-  const auto &nbs = neighbors(image, D, curr);
+  const auto &nbs = neighbors(curr);
   for (const auto &x : nbs)
   {
     bfs.enq(x);
@@ -187,7 +184,7 @@ void traverse(pair<int, int> parent, pair<int, int> curr, PNG &image, Queue<pair
     }
   }
 }
-
+*/
 RGBAPixel getColor(const std::vector<pair<int, RGBAPixel>> &pattern, int level)
 {
   int W = 0;
@@ -257,7 +254,31 @@ void rainbowRipple(PNG &image, pair<int, int> start, string sgc)
     D.push_back(row);
   }
 
-  traverse(start, start, image, bfs, D, 0);
+  //traverse(start, start, image, bfs, D, 0);
+  typedef pair<int, int> pixel_t;
+  typedef pair<int, pixel_t> data_t;
+  Queue<pair<pixel_t, data_t>> buf;
+  buf.enq(make_pair(start, make_pair(0, start)));
+
+  while(!buf.empty()){
+    auto x = buf.deq();
+    auto curr = x.second.second;
+    auto level = x.second.first;
+    if(good(image, D, curr, x.first)){
+      printf("(%d, %d) => %d\n", x.first.first, x.first.second, level);
+      bfs.enq(x.first);
+      DISTANCE(x.first) = x.second.first;
+    } 
+
+    auto nbs = neighbors(x.first);
+    for(auto e: nbs){
+      if(e.first >=0 && e.first < W && e.second >=0 && e.second < H){
+        if(good(image, D, curr, e)){
+          buf.enq(make_pair(e, make_pair(x.second.first+1, curr)));
+        }
+      }
+    }
+  }
 
   int i = 0;
   while (!bfs.empty())
@@ -266,7 +287,7 @@ void rainbowRipple(PNG &image, pair<int, int> start, string sgc)
     int level = DISTANCE(x);
 
     printf("[%d] >> (%d,%d) = %d\n", i++, x.first, x.second, level);
-    //*image.getPixel(x.first, x.second) = getColor(color_pattern, level);
-    *image.getPixel(x.first, x.second) = RGBAPixel(level * 10 % 255, 0, 0);
+    *image.getPixel(x.first, x.second) = getColor(color_pattern, level);
+    //*image.getPixel(x.first, x.second) = RGBAPixel(level * 10 % 255, 0, 0);
   }
 }
