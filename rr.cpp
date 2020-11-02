@@ -155,7 +155,7 @@ bool getColor(const std::vector<pair<int, RGBAPixel>> &pattern, int level, RGBAP
 
   for (const auto &pat : pattern)
   {
-    if (level == 0)
+    if (level == pat.first)
     {
       pixel = pat.second;
       return true;
