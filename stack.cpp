@@ -138,14 +138,15 @@ void Stack<T>::resize(size_t n)
 {
   T *temp = items;
   T *resized = new T[n];
-  if(!resized){
+  if(resized == nullptr){
     throw std::string("too big size: ") + std::to_string(n);
   }
   max_items = n;
   items = resized;
   for (size_t i = 0; i < num_items; i++)
   {
-    items[i] = std::move(temp[i]);
+    items[i] = temp[i];
   }
+
   delete [] temp;
 };

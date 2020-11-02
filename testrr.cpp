@@ -17,7 +17,6 @@ int main()
   rainbowRipple(im1,start1,"0r0o0y0g0b0i0v");
   im1.writeToFile("images/georr.png");
 
-  return 0;
   PNG im2;
   im2.readFromFile("images/stanley-totem-poles.png");
   pair<int,int> start2(100,150);
