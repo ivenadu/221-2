@@ -105,6 +105,8 @@ bool closeEnough(RGBAPixel c1, RGBAPixel c2)
   return (dist <= 80);
 }
 
+#define DISTANCE(x) D[x.second][x.first]
+
 bool good(PNG &image, vector<vector<int>> &D,
           pair<int, int> curr, pair<int, int> next)
 {
@@ -121,78 +123,87 @@ bool good(PNG &image, vector<vector<int>> &D,
   // &&
   if (next.first < 0 || next.first >= (int)image.width())
     return false;
-  if (next.second < 0 || next.second >= (int) image.height())
+  if (next.second < 0 || next.second >= (int)image.height())
     return false;
 
-  if (D[next.first][next.second] != -1)
+  if (DISTANCE(next) != -1)
     return false;
 
   return closeEnough(*image.getPixel(curr.first, curr.second),
                      *image.getPixel(next.first, next.second));
 }
 
-vector<pair<int, int>> neighbors(PNG& image,vector<vector<int>> &D, pair<int, int> curr)
+vector<pair<int, int>> neighbors(PNG &image, vector<vector<int>> &D, pair<int, int> curr)
 {
 
   vector<pair<int, int>> n;
 
   {
-    auto x = make_pair(curr.first, curr.second +1);
-    if(good(image, D, curr, x)) n.push_back(x);
+    auto x = make_pair(curr.first, curr.second + 1);
+    if (good(image, D, curr, x))
+      n.push_back(x);
   }
   {
-    auto x = make_pair(curr.first, curr.second -1);
-    if(good(image, D, curr, x)) n.push_back(x);
+    auto x = make_pair(curr.first, curr.second - 1);
+    if (good(image, D, curr, x))
+      n.push_back(x);
   }
   {
-    auto x = make_pair(curr.first +1, curr.second );
-    if(good(image, D, curr, x)) n.push_back(x);
+    auto x = make_pair(curr.first + 1, curr.second);
+    if (good(image, D, curr, x))
+      n.push_back(x);
   }
   {
-    auto x = make_pair(curr.first-1, curr.second );
-    if(good(image, D, curr, x)) n.push_back(x);
+    auto x = make_pair(curr.first - 1, curr.second);
+    if (good(image, D, curr, x))
+      n.push_back(x);
   }
 
   return n;
 }
 
-#define DISTANCE(x) D[x.first][x.second]
-
-void traverse(pair<int, int> parent, pair<int, int> curr,PNG &image, Queue<pair<int, int>> &bfs, vector<vector<int>> &D, int level)
+void traverse(pair<int, int> parent, pair<int, int> curr, PNG &image, Queue<pair<int, int>> &bfs, vector<vector<int>> &D, int level)
 {
-  if(good(image, D, parent, curr)){
+  if (good(image, D, parent, curr))
+  {
     bfs.enq(curr);
-    D[curr.first][curr.second] = level;
+    DISTANCE(curr) = level;
   }
 
   const auto &nbs = neighbors(image, D, curr);
   for (const auto &x : nbs)
   {
-    if (good(image, D, curr, x))
-    {
-      bfs.enq(x);
-      DISTANCE(x) = level + 1;
-    }
+    bfs.enq(x);
+    DISTANCE(x) = level + 1;
   }
 
   for (const auto &x : nbs)
   {
-    traverse(curr, x, image, bfs, D, level + 1);
+    const auto &nbs = neighbors(image, D, x);
+    for (const auto &x : nbs)
+    {
+      bfs.enq(x);
+      DISTANCE(x) = level + 2;
+    }
   }
 }
 
-const RGBAPixel& getColor(const std::vector<pair<int, RGBAPixel>>& pattern, int level){
+RGBAPixel getColor(const std::vector<pair<int, RGBAPixel>> &pattern, int level)
+{
   int W = 0;
-  for(const auto& pat: pattern){
-    W += (pat.first+1);
+  for (const auto &pat : pattern)
+  {
+    W += (pat.first + 1);
   }
   level = level % W;
 
-  for(const auto& pat: pattern){
-    if(level < pat.first+1){
+  for (const auto &pat : pattern)
+  {
+    if (level < pat.first + 1)
+    {
       return pat.second;
     }
-    level -= (pat.first+1);
+    level -= (pat.first + 1);
   }
   throw "BAD!!!";
 }
@@ -231,28 +242,31 @@ void rainbowRipple(PNG &image, pair<int, int> start, string sgc)
   // @todo Add your code here.
   Queue<pair<int, int>> bfs;
 
-  const auto& color_pattern = parseGaps(sgc);
-
-#define COLOR(i) color_pattern[i % color_pattern.size()]
+  auto color_pattern = parseGaps(sgc);
 
   //initialize D
   vector<vector<int>> D;
   int H = image.height(), W = image.width();
+  vector<int> row;
+  for (int c = 0; c < W; c++)
+  {
+    row.push_back(-1);
+  }
   for (int r = 0; r < H; r++)
   {
-    vector<int> row;
-    for (int c = 0; c < W; c++)
-    {
-      row.push_back(-1);
-    }
     D.push_back(row);
   }
 
   traverse(start, start, image, bfs, D, 0);
 
-  while(!bfs.empty()){
-    const auto& x = bfs.deq();
+  int i = 0;
+  while (!bfs.empty())
+  {
+    auto x = bfs.deq();
     int level = DISTANCE(x);
-    *image.getPixel(x.first, x.second) = getColor(color_pattern, level);
+
+    printf("[%d] >> (%d,%d) = %d\n", i++, x.first, x.second, level);
+    //*image.getPixel(x.first, x.second) = getColor(color_pattern, level);
+    *image.getPixel(x.first, x.second) = RGBAPixel(level * 10 % 255, 0, 0);
   }
 }
