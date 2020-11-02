@@ -69,8 +69,11 @@ T Stack<T>::pop()
   assert(num_items >0);
   T x = items[num_items-1];
   num_items--;
-  if (num_items <= (max_items / SHRINKWHEN))
-    resize(max_items / EXPANSIONFACTOR);
+  if (num_items <= (max_items / SHRINKWHEN)){
+    size_t new_size = max_items / EXPANSIONFACTOR;
+    if(new_size >= DEFAULTCAPACITY)
+      resize(new_size);
+  }
   return x;
 };
 
@@ -142,7 +145,7 @@ void Stack<T>::resize(size_t n)
   items = resized;
   for (size_t i = 0; i < num_items; i++)
   {
-    items[i] = temp[i];
+    items[i] = std::move(temp[i]);
   }
-  delete temp;
+  delete [] temp;
 };

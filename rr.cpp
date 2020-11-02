@@ -6,8 +6,6 @@
  *
  */
 #include "rr.h"
-
-#include <cassert>
 // This shows all the function declarations (and some of the
 // functions) that I used to implement rainbowRipple.
 // You can create additional functions and/or delete/replace functions
@@ -93,7 +91,7 @@ vector<pair<int, RGBAPixel>> parseGaps(string sgc)
   return vgc;
 }
 
-bool closeEnough(RGBAPixel c1, RGBAPixel c2)
+bool closeEnough(const RGBAPixel& c1, const RGBAPixel& c2)
 {
   // Returns true iff color c1 is close enough to color c2
   //
@@ -108,7 +106,7 @@ bool closeEnough(RGBAPixel c1, RGBAPixel c2)
 #define DISTANCE(x) D[x.second][x.first]
 
 bool good(PNG &image, vector<vector<int>> &D,
-          pair<int, int> curr, pair<int, int> next)
+          const pair<int, int>& curr, const pair<int, int>& next)
 {
   // Returns true iff a neighbor "next" of a pixel "curr" is:
   // 1. within the image,
@@ -133,27 +131,15 @@ bool good(PNG &image, vector<vector<int>> &D,
                      *image.getPixel(next.first, next.second));
 }
 
-vector<pair<int, int>> neighbors(pair<int, int> curr)
+vector<pair<int, int>> neighbors(const pair<int, int>& curr)
 {
 
   vector<pair<int, int>> n;
 
-  {
-    auto x = make_pair(curr.first, curr.second + 1);
-    n.push_back(x);
-  }
-  {
-    auto x = make_pair(curr.first, curr.second - 1);
-    n.push_back(x);
-  }
-  {
-    auto x = make_pair(curr.first + 1, curr.second);
-    n.push_back(x);
-  }
-  {
-    auto x = make_pair(curr.first - 1, curr.second);
-    n.push_back(x);
-  }
+  n.push_back(make_pair(curr.first, curr.second + 1));
+  n.push_back(make_pair(curr.first, curr.second - 1));
+  n.push_back(make_pair(curr.first+1, curr.second));
+  n.push_back(make_pair(curr.first-1, curr.second));
 
   return n;
 }
@@ -185,7 +171,7 @@ void traverse(pair<int, int> parent, pair<int, int> curr, PNG &image, Queue<pair
   }
 }
 */
-RGBAPixel getColor(const std::vector<pair<int, RGBAPixel>> &pattern, int level)
+const RGBAPixel& getColor(const std::vector<pair<int, RGBAPixel>> &pattern, int level)
 {
   int W = 0;
   for (const auto &pat : pattern)
@@ -244,7 +230,9 @@ void rainbowRipple(PNG &image, pair<int, int> start, string sgc)
   //initialize D
   vector<vector<int>> D;
   int H = image.height(), W = image.width();
+  D.reserve(H);
   vector<int> row;
+  row.reserve(W);
   for (int c = 0; c < W; c++)
   {
     row.push_back(-1);
@@ -256,25 +244,26 @@ void rainbowRipple(PNG &image, pair<int, int> start, string sgc)
 
   //traverse(start, start, image, bfs, D, 0);
   typedef pair<int, int> pixel_t;
-  typedef pair<int, pixel_t> data_t;
+  typedef pair<int, pixel_t> data_t; //(level, centre)
   Queue<pair<pixel_t, data_t>> buf;
   buf.enq(make_pair(start, make_pair(0, start)));
 
   while(!buf.empty()){
-    auto x = buf.deq();
-    auto curr = x.second.second;
+    const auto& x = buf.deq();
     auto level = x.second.first;
+    const auto& curr = x.second.second;
+
     if(good(image, D, curr, x.first)){
       printf("(%d, %d) => %d\n", x.first.first, x.first.second, level);
       bfs.enq(x.first);
-      DISTANCE(x.first) = x.second.first;
+      DISTANCE(x.first) = level;
     } 
 
-    auto nbs = neighbors(x.first);
-    for(auto e: nbs){
+    const auto& nbs = neighbors(x.first);
+    for(auto& e: nbs){
       if(e.first >=0 && e.first < W && e.second >=0 && e.second < H){
         if(good(image, D, curr, e)){
-          buf.enq(make_pair(e, make_pair(x.second.first+1, curr)));
+          buf.enq(make_pair(e, make_pair(level+1, curr)));
         }
       }
     }
@@ -283,7 +272,7 @@ void rainbowRipple(PNG &image, pair<int, int> start, string sgc)
   int i = 0;
   while (!bfs.empty())
   {
-    auto x = bfs.deq();
+    const auto& x = bfs.deq();
     int level = DISTANCE(x);
 
     printf("[%d] >> (%d,%d) = %d\n", i++, x.first, x.second, level);
