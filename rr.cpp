@@ -238,11 +238,11 @@ void rainbowRipple(PNG &image, pair<int, int> start, string sgc)
     const auto &nbs = neighbors(x.first);
     for (auto &e : nbs)
     {
-      if (good(image, D, curr, e))
+      if (good(image, D, x.first, e))
       {
         bfs.enq(e);
         DISTANCE(e) = level + 1;
-        buf.enq(make_pair(e, make_pair(level + 1, curr)));
+        buf.enq(make_pair(e, make_pair(level + 1, x.first)));
       }
     }
   }
