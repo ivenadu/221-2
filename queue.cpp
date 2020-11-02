@@ -6,6 +6,7 @@
  *
  */
 
+
 /**
  * Adds the parameter object to the back of the Queue.
  *
@@ -13,9 +14,16 @@
  */
 template <class T> void Queue<T>::enq(T const &newItem)
 {
-  /**
-   * @todo Your code here!
-   */
+  while (!stack_1.empty()) {
+    stack_2.push(stack_1.pop());
+    }
+  stack_1.push(newItem);
+  while (!stack_2.empty()) {
+    stack_1.push(stack_2.pop());
+  }
+    
+    
+  
 }
 
 /**
@@ -26,10 +34,7 @@ template <class T> void Queue<T>::enq(T const &newItem)
  */
 template <class T> T Queue<T>::deq()
 {
-  /**
-   * @todo Your code here! You will need to replace the following line.
-   */
-  return T();
+  return stack_1.pop();
 }
 
 /**
