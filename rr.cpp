@@ -218,17 +218,15 @@ void rainbowRipple(PNG &image, pair<int, int> start, string sgc)
   }
 
   typedef pair<int, int> pixel_t;
-  typedef pair<int, pixel_t> data_t; //(level, centre)
-  Queue<pair<pixel_t, data_t>> buf;
-  buf.enq(make_pair(start, make_pair(0, start)));
+  Queue<pair<pixel_t, int>> buf; //int-> level
+  buf.enq(make_pair(start, 0));
   bfs.enq(start);
   DISTANCE(start) = 0;
 
   while (!buf.empty())
   {
     const auto &x = buf.deq();
-    auto level = x.second.first;
-    const auto &curr = x.second.second;
+    auto level = x.second;
 
     const auto &nbs = neighbors(x.first);
     for (auto &e : nbs)
@@ -237,7 +235,7 @@ void rainbowRipple(PNG &image, pair<int, int> start, string sgc)
       {
         bfs.enq(e);
         DISTANCE(e) = level + 1;
-        buf.enq(make_pair(e, make_pair(level + 1, x.first)));
+        buf.enq(make_pair(e, level + 1));
       }
     }
   }
